@@ -1,0 +1,115 @@
+#!/usr/bin/env bash
+
+ACCESS="nostromo"
+SOFT_GREEN="\033[38;5;28m"
+DIM_GREEN="\033[38;5;22m"
+RED="\033[38;5;196m"
+RESET="\033[0m"
+
+typewriter() {
+  text="$1"
+  for (( i=0; i<${#text}; i++ )); do
+    printf "%b%s%b" "$SOFT_GREEN" "${text:$i:1}" "$RESET"
+    sleep 0.01
+  done
+  printf "\n"
+}
+
+center_text() {
+  termwidth=$(tput cols)
+  text="$1"
+  textwidth=$(echo -n "$text" | wc -c)
+  padding=$(( (termwidth - textwidth) / 2 ))
+  printf "%*s%s\n" "$padding" "" "$text"
+}
+
+BANNER=(
+"██╗    ██╗███████╗██╗   ██╗██╗      █████╗ ███╗   ██╗██████╗"
+"██║    ██║██╔════╝╚██╗ ██╔╝██║     ██╔══██╗████╗  ██║██╔══██╗"
+"██║ █╗ ██║█████╗   ╚████╔╝ ██║     ███████║██╔██╗ ██║██║  ██║"
+"██║███╗██║██╔══╝    ╚██╔╝  ██║     ██╔══██║██║╚██╗██║██║  ██║"
+"╚███╔███╔╝███████╗   ██║   ███████╗██║  ██║██║ ╚████║██████╔╝"
+" ╚══╝╚══╝ ╚══════╝   ╚═╝   ╚══════╝╚═╝  ╚═╝╚═╝  ╚═══╝╚═════╝ "
+)
+
+clear
+printf "\033[?25l"
+
+typewriter "Initializing Weyland-Yutani Fleet Registry..."
+sleep 0.4
+typewriter "Scanning deep space transmissions..."
+sleep 0.4
+typewriter "Decrypting ship manifests..."
+sleep 0.4
+
+clear
+echo
+for line in "${BANNER[@]}"; do
+  center_text "$line"
+done
+echo
+
+center_text "BIOMETRIC AUTHENTICATION REQUIRED"
+sleep 0.6
+
+ATTEMPTS=3
+
+while [ $ATTEMPTS -gt 0 ]; do
+  echo
+  center_text "ENTER FLEET ACCESS CODE:"
+  read -s CODE
+  echo
+
+  if [ "$CODE" = "$ACCESS" ]; then
+    center_text "ACCESS GRANTED"
+    sleep 1
+    break
+  else
+    ATTEMPTS=$((ATTEMPTS-1))
+    center_text "ACCESS DENIED — Attempts Remaining: $ATTEMPTS"
+    sleep 1
+  fi
+
+  if [ $ATTEMPTS -eq 0 ]; then
+    center_text "SECURITY LOCKDOWN INITIATED"
+    sleep 2
+    printf "\033[?25h"
+    exit
+  fi
+done
+
+clear
+echo
+for line in "${BANNER[@]}"; do
+  center_text "$line"
+done
+echo
+center_text "WEYLAND-YUTANI FLEET REGISTRY"
+echo
+
+OPTIONS=()
+
+for cmd in fast2 thinkfast weyland1 cmdcentre cmdcentre-bridge stealth stealth2; do
+  if command -v "$cmd" &> /dev/null; then
+    OPTIONS+=("$cmd")
+  fi
+done
+
+OPTIONS+=("CLASSIFIED PROJECT")
+OPTIONS+=("Exit")
+
+CHOICE=$(printf "%s\n" "${OPTIONS[@]}" | \
+fzf --height=40% --layout=reverse --border --prompt="Select Vessel > ")
+
+printf "\033[?25h"
+
+case "$CHOICE" in
+  Exit)
+    clear
+  ;;
+  *)
+    if command -v "$CHOICE" &> /dev/null; then
+      $CHOICE
+    fi
+  ;;
+esac
